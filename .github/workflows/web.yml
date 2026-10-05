@@ -1,0 +1,64 @@
+# Exporta GGmon a web con Godot y lo publica en GitHub Pages en cada push a main.
+# Requiere, una sola vez: Settings > Pages > Source: "GitHub Actions".
+name: Publicar version web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7-stable
+  # Godot busca las plantillas en una carpeta con punto en vez de guion
+  GODOT_TEMPLATES: 4.7.stable
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Bajar Godot y las plantillas de exportacion
+        run: |
+          base=https://github.com/godotengine/godot/releases/download/$GODOT_VERSION
+          curl -sSL -o godot.zip $base/Godot_v${GODOT_VERSION}_linux.x86_64.zip
+          curl -sSL -o templates.tpz $base/Godot_v${GODOT_VERSION}_export_templates.tpz
+          unzip -q godot.zip
+          mv Godot_v${GODOT_VERSION}_linux.x86_64 godot
+          chmod +x godot
+          mkdir -p ~/.local/share/godot/export_templates/$GODOT_TEMPLATES
+          unzip -q templates.tpz
+          mv templates/* ~/.local/share/godot/export_templates/$GODOT_TEMPLATES/
+          rm -rf godot.zip templates.tpz templates
+
+      - name: Exportar a web
+        run: |
+          mkdir -p build/web
+          ./godot --headless --path . --import
+          ./godot --headless --path . --export-release "Web" build/web/index.html
+          test -f build/web/index.html
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: build/web
+
+  deploy:
+    needs: export
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

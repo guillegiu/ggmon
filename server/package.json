@@ -1,0 +1,12 @@
+{
+  "name": "ggmon-server",
+  "private": true,
+  "description": "Servidor de salas (relay) de GGmon y servidor de la version web para red local",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "^8.0.0"
+  }
+}

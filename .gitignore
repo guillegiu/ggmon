@@ -1,0 +1,12 @@
+# Godot: cache de importacion
+.godot/
+
+# Salidas de exportacion y de pruebas
+build/
+capturas/
+
+# Material de referencia extraido de otros juegos: no se versiona
+tools/ref/
+
+# Servidor de salas
+server/node_modules/
