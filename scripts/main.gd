@@ -11,7 +11,7 @@ extends Node3D
 #   --pick=dino|bug|frog            entra directo a pruebas con esa especie
 #   --gallery=dino|bug|frog|fx      primeros planos para revisar el diseño
 #   --selftest [--only=<especie>]   secuencia automatica con capturas (o solo las habilidades de una especie)
-#   --net-test=host|guest           prueba automatica de la partida online (dos instancias)
+#   --net-test=host|guest [--url=]  prueba automatica de la partida online (dos instancias)
 #   --shots=<carpeta>               donde guardar las capturas
 
 const Stage = preload("res://scripts/stage.gd")
@@ -716,7 +716,11 @@ func _net_test(as_host: bool) -> void:
 	auto_orbs = false
 	var side := "anfitrion" if as_host else "invitado"
 	net.failed.connect(func(reason): print("[net %s] fallo: %s" % [side, reason]))
-	open_room(as_host, "dino" if as_host else "frog", "TEST", Net.LOCAL_URL)
+	var url: String = Net.LOCAL_URL
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--url="):
+			url = arg.trim_prefix("--url=")
+	open_room(as_host, "dino" if as_host else "frog", "TEST", url)
 	var waited := 0
 	while game == null and waited < 900:
 		await _wait(1)

@@ -9,8 +9,8 @@ signal peer_left
 signal failed(reason: String)
 signal message(data: Dictionary)
 
-# Direccion del servidor de salas publico (wss://...). Vacia = todavia no hay uno desplegado.
-const PUBLIC_URL := ""
+# Servidor de salas publico (server/ desplegado en Render). Vacia = no hay ninguno.
+const PUBLIC_URL := "wss://ggmon-a9y3.onrender.com"
 const LOCAL_URL := "ws://localhost:8787"
 
 var is_host := false
@@ -31,7 +31,8 @@ static func default_url() -> String:
 			return PUBLIC_URL
 		# Si la pagina la sirve el servidor de salas (red local), es esa misma maquina.
 		return ("wss://" if secure else "ws://") + host
-	return LOCAL_URL
+	# Version de escritorio: el publico, salvo que no haya ninguno configurado.
+	return PUBLIC_URL if PUBLIC_URL != "" else LOCAL_URL
 
 
 func open(url: String, as_host: bool, room_code: String) -> void:
